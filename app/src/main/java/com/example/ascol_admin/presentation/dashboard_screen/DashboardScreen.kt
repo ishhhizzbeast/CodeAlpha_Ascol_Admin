@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.ascol_admin.R
 import com.example.ascol_admin.presentation.dashboard_screen.components.DashboardItemCard
 import com.example.compose.primaryContainerLight
@@ -28,9 +29,10 @@ import com.example.compose.primaryDark
 import com.example.compose.primaryLight
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun DashboardScreen(modifier:Modifier = Modifier) {
+fun DashboardScreen(
+    navController: NavController,
+    modifier:Modifier = Modifier) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -50,7 +52,7 @@ fun DashboardScreen(modifier:Modifier = Modifier) {
             contentPadding = PaddingValues(12.dp)
         ) {
             items(dashboard.size){
-                DashboardItemCard(dashboard = dashboard[it])
+                DashboardItemCard(dashboard = dashboard[it],navController,)
             }
         }
     }

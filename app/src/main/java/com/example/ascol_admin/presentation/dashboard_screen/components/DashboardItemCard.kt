@@ -2,6 +2,7 @@ package com.example.ascol_admin.presentation.dashboard_screen.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,18 +28,29 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.ascol_admin.R
+import com.example.ascol_admin.presentation.ScreenList.Screen
 import com.example.ascol_admin.presentation.dashboard_screen.Dashboard
 
 
 @Composable
-fun DashboardItemCard(dashboard: Dashboard) {
+fun DashboardItemCard(dashboard: Dashboard,navController: NavController) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .size(height = 160.dp, width = 70.dp)
-        ,
+            .clickable {
+            when (dashboard.title) {
+                "upload notice" -> navController.navigate(Screen.uploadNotice.route)
+                "upload pdf" -> navController.navigate(Screen.uploadPdf.route)
+                "upload Gallery" -> navController.navigate(Screen.uploadPhotos.route)
+                "upload faculty" -> navController.navigate(Screen.updateFaculty.route)
+                "Delete notice" -> navController.navigate(Screen.deleteNotice.route)
+            }
+
+        },
         elevation = CardDefaults.cardElevation(5.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
