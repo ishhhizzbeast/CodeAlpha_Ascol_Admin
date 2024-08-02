@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.runtime.android)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,6 +88,9 @@ dependencies {
     ksp("com.google.dagger:hilt-android-compiler:2.48")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    //coil library
+    implementation("io.coil-kt:coil-compose:2.1.0")
+
 
 
 

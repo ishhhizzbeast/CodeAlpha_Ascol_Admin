@@ -10,10 +10,15 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.ascol_admin.presentation.ScreenList.Screen
 import com.example.ascol_admin.presentation.dashboard_screen.DashboardScreen
+import com.example.ascol_admin.presentation.deleteNotice.DeleteNotice
+import com.example.ascol_admin.presentation.uploadFaculty.AddTeacherScreen
+import com.example.ascol_admin.presentation.uploadFaculty.UpdateFaculty
 import com.example.ascol_admin.presentation.upload_gallery.UploadGalleryScreen
 import com.example.ascol_admin.presentation.upload_notice.UploadNoticeScreen
+import com.example.ascol_admin.presentation.upload_pdf.UploadPdfScreen
 import com.example.ascol_admin.presentation.viewmodel.NoticeViewModel
 import com.example.compose.Ascol_AdminTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,16 +43,22 @@ class MainActivity : ComponentActivity() {
                             UploadNoticeScreen()
                         }
                         composable(Screen.uploadPdf.route){
-                            UploadNoticeScreen()
+                            UploadPdfScreen()
                         }
                         composable(Screen.uploadPhotos.route){
                             UploadGalleryScreen()
                         }
                         composable(Screen.updateFaculty.route){
-                            UploadNoticeScreen()
+                            UpdateFaculty(navController)
                         }
                         composable(Screen.deleteNotice.route){
-                            UploadNoticeScreen()
+                            DeleteNotice()
+                        }
+                        composable(
+                            Screen.addTeacher.route
+                        ){
+
+                            AddTeacherScreen(navController)
                         }
 
                     }

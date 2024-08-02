@@ -1,7 +1,7 @@
 package com.example.ascol_admin.di.noticedi
 
-import com.example.ascol_admin.data.datasource.NoticeRemoteDataSource
-import com.example.ascol_admin.data.datasource.NoticeRemoteDataSourceImpl
+import com.example.ascol_admin.data.datasource.NoticeDataSource.NoticeRemoteDataSource
+import com.example.ascol_admin.data.datasource.NoticeDataSource.NoticeRemoteDataSourceImpl
 import com.example.ascol_admin.data.repository.NoticeRepository
 import com.example.ascol_admin.data.repository.NoticeRepositoryImpl
 import com.example.ascol_admin.domain.model.usecases.UploadNoticeUseCase

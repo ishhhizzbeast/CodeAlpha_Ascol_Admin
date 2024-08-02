@@ -1,10 +1,10 @@
-package com.example.ascol_admin.data.datasource
+package com.example.ascol_admin.data.datasource.NoticeDataSource
 
+import com.example.ascol_admin.data.datasource.NoticeDataSource.NoticeRemoteDataSource
 import com.example.ascol_admin.domain.model.Notice
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
 import javax.inject.Inject
 
 class NoticeRemoteDataSourceImpl @Inject constructor(

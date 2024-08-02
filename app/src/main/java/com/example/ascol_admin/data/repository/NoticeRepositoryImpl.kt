@@ -1,6 +1,6 @@
 package com.example.ascol_admin.data.repository
 
-import com.example.ascol_admin.data.datasource.NoticeRemoteDataSource
+import com.example.ascol_admin.data.datasource.NoticeDataSource.NoticeRemoteDataSource
 import com.example.ascol_admin.domain.model.Notice
 import javax.inject.Inject
 

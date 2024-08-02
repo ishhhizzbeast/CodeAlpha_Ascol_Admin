@@ -1,9 +1,9 @@
-package com.example.ascol_admin.presentation.upload_notice
+package com.example.ascol_admin.presentation.upload_pdf
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,44 +52,44 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.ascol_admin.R
+import com.example.ascol_admin.presentation.upload_notice.uriToBitmap
 import com.example.ascol_admin.presentation.viewmodel.NoticeViewModel
-import java.io.IOException
-import java.io.InputStream
+import com.example.ascol_admin.presentation.viewmodel.PdfViewModel
 
-
+@Preview
 @Composable
-fun UploadNoticeScreen() {
-    val viewModel: NoticeViewModel = hiltViewModel()
+fun UploadPdfScreen() {
+    val viewmodel:PdfViewModel = hiltViewModel()
     var title by remember { mutableStateOf("") }
     var isTitleError by remember { mutableStateOf(false) }
-    var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var selectedFileName by remember { mutableStateOf<String?>(null) }
+    var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
 
     val context = LocalContext.current
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        selectedBitmap = uri?.let { uri ->
-            uriToBitmap(context, uri)
-        }
+        selectedFileUri = uri
+        selectedFileName = uri?.let { getFileName(context, it) }
     }
 
     // Observe the upload status
-    val uploadStatus by viewModel.uploadStatus.collectAsState()
-    val isUploading by viewModel.isUploading.collectAsState()
+    val uploadStatus by viewmodel.uploadStatus.collectAsState()
+    val isUploading by viewmodel.isLoading.collectAsState()
 
     LaunchedEffect(uploadStatus) {
         uploadStatus?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            viewModel.resetUploadStatus() // Clear status after showing toast
-            selectedBitmap = null
+            viewmodel.resetLoadingStatus() // Clear status after showing toast
+            selectedFileName = null
+            selectedFileUri = null
+            title = ""
         }
     }
-
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
@@ -99,9 +99,17 @@ fun UploadNoticeScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                SelectImageCard(onClick = {
-                    launcher.launch("image/*")
+                SelectPdfCard(onClick = {
+                    launcher.launch("*/*")
                 })
+                selectedFileName?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
             item {
@@ -116,7 +124,7 @@ fun UploadNoticeScreen() {
                     },
                     isError = isTitleError,
                     label = {
-                        Text(text = "Enter the notice title")
+                        Text(text = "Enter the document title")
                     },
                     trailingIcon = {
                         if (isTitleError) {
@@ -129,7 +137,7 @@ fun UploadNoticeScreen() {
                     },
                     supportingText = {
                         if (isTitleError) {
-                            Text(text = "title should not be empty")
+                            Text(text = "Title should not be empty")
                         }
                     }
                 )
@@ -137,57 +145,26 @@ fun UploadNoticeScreen() {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        if (title.isBlank()) {
-                            isTitleError = true
-                        } else if (selectedBitmap == null) {
-                            Toast.makeText(context,"Please select image",Toast.LENGTH_LONG).show()
-                        }
-                        else{
-                            isTitleError = false
-                            selectedBitmap?.let {
-                                viewModel.uploadNotice(title, it)
-                            }
-                        }
+                              if(selectedFileUri == null){
+                                  Toast.makeText(context,"Please select a pdf first",Toast.LENGTH_LONG).show()
+                              }
+                              else if(title.isBlank()){
+                                  Toast.makeText(context,"Please give a title of pdf",Toast.LENGTH_LONG).show()
+                              }else{
+                                  selectedFileUri?.let {
+                                      viewmodel.uploadPdf(title,it)
+                                  }
+                              }
                     },
                     border = BorderStroke(
                         width = 2.dp,
                         color = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Text(text = "Upload notice")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                val rainbowColorsBrush = remember {
-                    Brush.sweepGradient(
-                        listOf(
-                            Color(0xFF9575CD),
-                            Color(0xFFBA68C8),
-                            Color(0xFFE57373),
-                            Color(0xFFFFB74D),
-                            Color(0xFFFFF176),
-                            Color(0xFFAED581),
-                            Color(0xFF4DD0E1),
-                            Color(0xFF9575CD)
-                        )
-                    )
-                }
-
-                selectedBitmap?.let { bitmap ->
-                    Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(shape = RoundedCornerShape(16.dp))
-                            .border(4.dp,rainbowColorsBrush, shape = RoundedCornerShape(16.dp))
-                            .height(500.dp)
-                        ,
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
+                    Text(text = "Upload Document")
                 }
             }
         }
-
         if (isUploading) {
             Box(
                 modifier = Modifier
@@ -198,12 +175,13 @@ fun UploadNoticeScreen() {
             ) {
                 CircularProgressIndicator()
             }
+
         }
     }
 }
 
 @Composable
-fun SelectImageCard(onClick:()->Unit) {
+fun SelectPdfCard(onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -221,8 +199,7 @@ fun SelectImageCard(onClick:()->Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                ,
+                    .weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -232,35 +209,34 @@ fun SelectImageCard(onClick:()->Unit) {
                         .background(MaterialTheme.colorScheme.inversePrimary, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(modifier = Modifier.size(45.dp),
-                        painter = painterResource(id = R.drawable.picture),
-                        contentDescription = "", contentScale = ContentScale.FillBounds)
+                    Image(
+                        modifier = Modifier.size(45.dp),
+                        painter = painterResource(id = R.drawable.fileupload),
+                        contentDescription = "",
+                        contentScale = ContentScale.FillBounds
+                    )
                 }
             }
             HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
-            Box(modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Text(text = "Select Image", textAlign = TextAlign.Center, fontSize = 16.sp)
+            Box(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth(), contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Select Document", textAlign = TextAlign.Center, fontSize = 16.sp)
             }
         }
     }
 }
 
-// Function to convert URI to Bitmap
-fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
-    var inputStream: InputStream? = null
-    return try {
-        inputStream = context.contentResolver.openInputStream(uri)
-        BitmapFactory.decodeStream(inputStream)
-    } catch (e: IOException) {
-        e.printStackTrace()
-        null
-    }finally {
-        try {
-            inputStream?.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
+// Function to get the file name from Uri
+fun getFileName(context: Context, uri: Uri): String {
+    var fileName = ""
+    val cursor = context.contentResolver.query(uri, null, null, null, null)
+    cursor?.use {
+        if (it.moveToFirst()) {
+            fileName = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
         }
     }
+    return fileName
 }
